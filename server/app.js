@@ -10,10 +10,10 @@ app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 const db = mysql.createPool({
-     host: "mysql-118118-0.cloudclusters.net",
+     host: "mysql-121145-0.cloudclusters.net",
     user: "admin",
-    port:"13500",
-    password: "AAYNYwTH",
+    port:"19854",
+    password: "10yMFplL",
     database: "attendance"
 })
 db.connect(function (error) {
