@@ -16,13 +16,14 @@ const db = mysql.createPool({
     password: "10yMFplL",
     database: "attendance"
 })
-db.connect(function (error) {
-    if (error) {
-        console.error('Error connecting to database: ' + error.stack);
+db.getConnection((err, connection) => {
+    if (err) {
+        console.error('Error connecting to database: ' + err.stack);
         return;
     }
-    console.log('Connected to database with ID ' + db.threadId);
+    console.log('Connected to database with ID ' + connection.threadId);
 });
+
 //inser status
 app.post("/insertstatus/:id/:attdate/:proj_id", (req, res) => {
     const id = req.params.id
