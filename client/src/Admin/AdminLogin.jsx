@@ -45,7 +45,7 @@ const AdminLogin = () => {
         e.preventDefault()
         const { email, password } = detail
 
-        const res = await fetch("https://nexusnova.vercel.app/login", {
+        const res = await fetch("/login", {
 
             method: "POST",
             headers: {
