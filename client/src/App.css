@@ -220,7 +220,7 @@ table th:last-child{
   width: 100%;
   height: 100vh;
   position: relative;
-  background: #f5f8fd url("./images/intro-bg.jpg") center top no-repeat;
+  background: #f5f8fd url("./images/img2.png") center top no-repeat;
   background-size: cover;
   padding-top: 110px;
 }
