@@ -10,7 +10,7 @@ const withAuth = (Component) => {
     // Check if the user is logged in and has the necessary permissions
     if (!isLoggedIn || !permissions.includes('access-protected-page')) {
       navigate("/")
-      console.log("fuckkkkkkk");
+      console.log("noo");
     }
 
     return <Component {...props} />;
