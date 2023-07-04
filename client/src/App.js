@@ -19,7 +19,7 @@ function App() {
           <Route path='/contracter/:id' element={<Contracter />} />
           <Route path='addmember' element={<AddMember />} />
           <Route path='/about' element={<About />} />
-          
+          <Route path='/roles/:id/:projectName' element={<Roles />} />
         </Routes>
         
       
