@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css';
-import moment from 'moment'
+import moment from 'moment'; 
 import { CSVLink } from "react-csv";
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import ModeEditOutlineSharpIcon from '@mui/icons-material/ModeEditOutlineSharp';
@@ -20,19 +20,24 @@ import Modal from '@mui/joy/Modal';
 import Sheet from '@mui/joy/Sheet';
 import ModalClose from '@mui/joy/ModalClose';
 import withAuth from "./withAuth";
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import ModalDialog from '@mui/joy/ModalDialog';
 import Typography from '@mui/joy/Typography';
 import { Transition } from 'react-transition-group';
+import PanToolAltIcon from '@mui/icons-material/PanToolAlt';
 
 
 
 
 
 
-const Contracter = () => {
+
+const Contractor = () => {
+
+    const [rahopen, setrahOpen] = React.useState(false);
+    const maxLength = 25;
     const [topRightModal, setTopRightModal] = useState(false);
-  
-
+    const { project_id, role_id } = useParams();
     const toggleShow = () => setTopRightModal(!topRightModal);
     const buttonRef = useRef(null);
     const [showComponent, setShowComponent] = useState(true);
@@ -44,6 +49,7 @@ const Contracter = () => {
     const [getabsentdays, setgetabsentdays] = useState()
     const [allmemberstatus, setallmemberstatus] = useState([])
     const [countabsent, setcountabsent] = useState([])
+    const [rolename, setrolename] = useState([])
     const [countshifts, setcountshifts] = useState([])
     const [cisOpen, setcIsOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -105,7 +111,7 @@ const Contracter = () => {
 
             const data = await res.json()
             setstore(data)
-           
+
 
 
 
@@ -139,7 +145,7 @@ const Contracter = () => {
         handleShow()
     }
 
-
+    
     const navigate = useNavigate()
     const { id } = useParams();
     const [report, setreport] = useState([]);
@@ -195,7 +201,7 @@ const Contracter = () => {
         })
 
         const data = await res.json()
-     
+
 
 
         if (res.status === 422 || !data) {
@@ -340,7 +346,7 @@ const Contracter = () => {
 
             const dataone = await res.json()
             setTimeinout(dataone)
-         
+
 
 
         } catch (error) {
@@ -407,10 +413,10 @@ const Contracter = () => {
     //add member using form==========================================================
     const addmembersubmitt = async (e) => {
         e.preventDefault()
-        console.log(id);
+        
         const { member } = addmember
 
-        const res = await fetch(`/addmembers/${id}`, {
+        const res = await fetch(`/addmembers/${project_id}/${role_id}`, {
 
             method: "POST",
             headers: {
@@ -450,11 +456,11 @@ const Contracter = () => {
         const { Time_In, Time_out } = user
         const attstatus = text
         const attvalue = ide
-    
 
 
 
-        const res = await fetch(`/insertstatus/${PM_id}/${attdate}/${id}`, {
+
+        const res = await fetch(`/insertstatus/${PM_id}/${attdate}/${project_id}`, {
 
             method: "POST",
             headers: {
@@ -505,32 +511,28 @@ const Contracter = () => {
 
     //Fetch all the members using using useEffetct----------------------------------------------
     const tofetchallmember = async () => {
-
-
         try {
-
-            const res = await fetch(`/getmembers/${id}`, {
+            const res = await fetch(`/getmembers/${project_id}/${role_id}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json"
                 },
                 credentials: "include"
-            })
+            });
 
-            const data = await res.json()
-            setMember(data)
-            
+            const data = await res.json();
+            console.log(data);
+            setMember(data);
 
-
-
-
-
-
+            if (!data || data.length === 0) {
+                alert("no member is there")
+            }
         } catch (error) {
             console.log(error);
         }
-    }
+    };
+
 
 
     //function to get the member id --------------------------------------------------
@@ -578,7 +580,7 @@ const Contracter = () => {
 
             const result = await res.json()
             setcountabsent(result)
-            
+
 
         } catch (error) {
             console.log(error);
@@ -602,7 +604,7 @@ const Contracter = () => {
 
             const result = await res.json()
             setcountshifts(result)
-            
+
 
 
         } catch (error) {
@@ -617,30 +619,29 @@ const Contracter = () => {
 
 
 
-
     const todownloadreport = async () => {
         try {
-
-            const res = await fetch(`/downloadreport/${id}`, {
+            const res = await fetch(`/downloadreport/${project_id}/${role_id}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json"
                 },
                 credentials: "include"
-            })
+            });
 
-            const result = await res.json()
-            setreport(result)
+            const result = await res.json();
             
+            setreport(result);
+            console.log(result);
 
-
-
-
+            if (!result || Object.keys(result).length === 0) {
+                window.alert("No data is present.");
+            }
         } catch (error) {
             console.log(error);
         }
-    }
+    };
 
 
     //absentdays
@@ -658,7 +659,7 @@ const Contracter = () => {
 
             const result = await res.json()
             setgetabsentdays(result)
-            
+
 
 
 
@@ -669,11 +670,62 @@ const Contracter = () => {
     }
 
 
+    //markallpresent===============================================
+    const markallpresent = async (e) => {
+        e.preventDefault()
+
+        const confirmation = window.confirm("Are you sure you want to mark all members present?")
+
+        if (confirmation) {
+            try {
+                console.log("ggggg");
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 1000) // timeout after 10 seconds
+
+                const res = await fetch(`/markallpresent/${role_id}/${project_id}/${formattedToday}`, {
+                    signal: controller.signal,
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+
+                    body: JSON.stringify({ role_id, project_id, formattedToday })
+                })
+
+                const data = await res.json()
+
+                if (res.status === 422 || !data) {
+                    toast.error("An error occurred while marking all members present. Please try again later.", {
+                        position: "top-center",
+                        theme: "colored",
+                    })
+                } else {
+                    toast.success("All members are marked present", {
+                        position: "top-center",
+                        theme: "colored"
+                    })
+                    setTimeout(() => tofetchallmember(), 500)
+                }
+            } catch (err) {
+                toast.error("All members are already Marked Present", {
+                    position: "top-center",
+                    theme: "colored",
+                })
+                console.error(err)
+            }
+        }
+    }
+
+
+
+    //===============================================================
+
     const getallmemberstatus = async () => {
-       
+
         try {
 
-            const res = await fetch(`/getstatusmember/${formattedToday}/${id}`, {
+            const res = await fetch(`/getstatusmember/${formattedToday}/${project_id}/${role_id}`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -681,18 +733,42 @@ const Contracter = () => {
                 },
                 credentials: "include"
             })
-            
+
             const result = await res.json()
             setallmemberstatus(result)
-            
-
-
-
 
         } catch (error) {
             console.log(error);
         }
     }
+
+
+    //getrolename
+    const getrolename = async () => {
+
+        try {
+
+            const res = await fetch(`/getrolename/${role_id}`, {
+                method: "GET",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            })
+
+            const result1 = await res.json()
+            console.log(result1);
+            setrolename(result1)
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+
+
 
     useEffect(() => {
         todownloadreport()
@@ -710,6 +786,10 @@ const Contracter = () => {
         getallmemberstatus()
     }, [])
 
+    useEffect(() => {
+        getrolename()
+    }, [])
+
 
 
     return (
@@ -717,15 +797,27 @@ const Contracter = () => {
 
             <Navbar />
             {/* ---------------------------------------------admin navbar------------------------------------- */}
-            <nav class="navbar navbar-expand-lg bg-body-tertiary " data-bs-theme="dark">
+            <nav class="navbar admin-nav navbar-expand-lg bg-body-tertiary admin1 ">
+                {/* /* data-bs-theme="primary" */}
                 <div class="container-fluid">
                     <Chip style={{ marginRight: "5%" }}
-                        className="bg-light text-dark"
+                        className="bg-light text-primary "
                         color="neutral"
                         disabled={false}
                         size="md"
-                        variant="solid"
-                    >Contractor List of {smember[0]?.projectName}</Chip>
+                        label="primary"
+                        variant="outlined"
+                        fontWeight="bold"
+                    ><label className='admin1'>Contractor List of {smember[0]?.projectName.slice(0, maxLength)}   </label></Chip>
+                    <Button
+                        color="neutral"
+                        onClick={markallpresent}
+                        size="sm"
+
+                        startDecorator={< CreditScoreIcon />}
+                        style={{ backgroundColor: "white", color: "black", marginLeft: "-4.5%" }}
+                    >Mark All </Button>
+
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -734,26 +826,26 @@ const Contracter = () => {
                             <li class="nav-item">
                                 <Tooltip title="Current Status of a day" variant="solid">
                                     <NavLink onClick={() => { getallmemberstatus(); setOpen('center') }} type='button'
-                                        className="btn btn-outline-light me-3 mb-1">Today Status</NavLink>
+                                        className="text-primary admin1 btn btn-outline-light me-3 mb-1">Today's Status</NavLink>
                                 </Tooltip>
 
                             </li>
                             <li class="nav-item">
                                 <Tooltip title="Open Calendar and take attendance" variant="solid">
-                                    <NavLink type="button" onClick={() => { setIsattVisible(!isattVisible) }} className=" calendar-emp btn btn-outline-light "><CalendarMonthIcon /></NavLink>
+                                    <NavLink type="button" onClick={() => { setIsattVisible(!isattVisible) }} className=" calendar-emp btn btn-outline-light text-primary admin1 "><CalendarMonthIcon /></NavLink>
                                 </Tooltip>
 
                             </li>
                             <li class="nav-item">
 
-                                <CSVLink className="download-report btn btn-light mx-3" filename={"Attendance-Report.csv"} data={report} ><DownloadIcon /></CSVLink>
+                                <CSVLink className="download-report btn btn-light mx-3 text-primary admin1" filename={`${rolename[0]?.role_name}.csv`} data={report} ><DownloadIcon /></CSVLink>
 
 
                             </li>
                             <li class="nav-item">
                                 <Tooltip title="Add contractor" variant="solid">
                                     <NavLink onClick={() => { setIsVisible(!isVisible) }} type='button'
-                                        className=" add-emp btn btn-outline-light"><GroupAddIcon /></NavLink>
+                                        className=" add-emp btn btn-outline-light text-primary admin1"><GroupAddIcon /></NavLink>
                                 </Tooltip>
 
                             </li>
@@ -868,7 +960,7 @@ const Contracter = () => {
                                                             <tr>
                                                                 <th scope="row">{i + 1}</th>
                                                                 <td style={{ color: "#f57842" }} className='fw-bold'>{item.member}</td>
-                                                                <td className='fw-bold bg-white'><Button size='sm' style={{ backgroundColor: item.attstatus === "Present" ? 'green' : 'red' }}  onClick={function(){}} >{item.attstatus}</Button> </td>
+                                                                <td className='fw-bold bg-white'><Button size='sm' style={{ backgroundColor: item.attstatus === "Present" ? 'green' : 'red' }} onClick={function () { }} >{item.attstatus}</Button> </td>
                                                                 <td style={{ color: "#f57842" }} className='fw-bold'>{item.Time_In}</td>
                                                             </tr>
                                                         ))
@@ -892,28 +984,49 @@ const Contracter = () => {
 
                     <div className='col-sm-4 col-md-4 col-lg-4'>
                         <div class="row align-items-md-stretch ">
-                            <button className='btn btn-dark text-white mb-3'>Attendance report <label className='text-warning'>[</label> {contarctor[0]?.member} <label className='text-warning'>   ]</label></button>
+                            <button className='btn btn-dark text-light mb-3'>Attendance report <label className='text-warning'>[</label> {contarctor[0]?.member} <label className='text-warning'>   ]</label></button>
 
                             <div class="h-100 p-5 text-bg-light rounded-3 ">
 
 
-                                <ol class="list-group list-group-numbered  ">
 
-                                    {
-                                        smember.map((item, i) => (
 
+                                {smember.length > 0 ? (
+                                    <ol class="list-group list-group-numbered">
+                                        {smember.map((item, i) => (
                                             <li class="list-group-item d-flex justify-content-between align-items-start">
                                                 <div class="ms-2 me-auto">
-
-                                                    <NavLink ref={buttonRef} onClick={() => { absentdays(item.PM_id); handleClick(); getmemberid(item.PM_id) }} className="text-decoration-none"><div class="fw-bold">{item.member} </div>      </NavLink>
-
-                                                    {/* <span style={{ backgroundColor: item.attstatus === "present" ? 'green' : '#f02626' }} class="badge rounded-pill ">{item.attstatus} </span> <i onClick={() => modalClick(item.atte_id)} data-bs-toggle="modal" data-bs-target="#exampleModal" class="bi bi-pencil-square "></i>  */}
+                                                    <NavLink
+                                                        ref={buttonRef}
+                                                        onClick={() => {
+                                                            absentdays(item.PM_id);
+                                                            handleClick();
+                                                            getmemberid(item.PM_id);
+                                                        }}
+                                                        className="text-decoration-none"
+                                                    >
+                                                        <div class="fw-bold">{item.member}</div>
+                                                    </NavLink>
                                                 </div>
-                                                <i onClick={() => { totalshifts(item.PM_id); modalClick(item.PM_id) }} data-bs-toggle="modal" data-bs-target="#exampleModal" class="bi bi-pencil-square "></i>
+
+                                               
+
+                                                <i
+                                                    onClick={() => {
+                                                        totalshifts(item.PM_id);
+                                                        modalClick(item.PM_id);
+                                                        setrahOpen(true);
+                                                    }}
+
+                                                    class="bi bi-pencil-square"
+                                                ></i>
                                             </li>
-                                        ))
-                                    }
-                                </ol>
+                                        ))}
+                                    </ol>
+                                ) : (
+                                    <label className='text-bold text-danger'>No Member is Added</label>
+                                )}
+
 
                                 {isVisible &&
                                     <form method='post'>
@@ -923,12 +1036,13 @@ const Contracter = () => {
                                                 id="exampleInputEmail1"
                                                 aria-describedby="emailHelp"
                                                 name='member'
+                                                
                                                 value={addmember.cpassword}
                                                 onChange={handleInput}
                                             />
-                                            <div id="emailHelp" class="form-text">Add the member name in {smember[0]?.projectName}.</div>
+                                            <div id="emailHelp" class="form-text">Add the member name .</div>
                                         </div>
-                                        <Button className='bg-dark' color="neutral" onClick={(e) => addmembersubmitt(e)} >Submit</Button>
+                                        <Button type='submit' className='bg-dark' color="neutral" onClick={(e) => addmembersubmitt(e)} >Submit</Button>
 
                                     </form>
                                 }
@@ -986,9 +1100,9 @@ const Contracter = () => {
                                                     <tr>
                                                         <th className='fw-bold bg-white'>{i + 1}</th>
                                                         <th scope="row" className='fw-bold bg-white' ><span class="badge badge-primary text-dark">{item.attdate}</span></th>
-                                                        <td className='fw-bold bg-white'><Button size='sm' style={{ backgroundColor: item.attstatus === "Present" ? 'green' : 'red' }}  onClick={function(){}} >{item.attstatus}</Button> </td>
-                                                        
-                                                        <td className='fw-bold bg-white'><button onClick={(e) => makeabsentradio(item.PM_id, item.attdate)} className='btn-sm btn btn-secondary'><ModeEditOutlineSharpIcon style={{fontSize:"20px"}} /> </button></td>
+                                                        <td className='fw-bold bg-white'><Button size='sm' style={{ backgroundColor: item.attstatus === "Present" ? 'green' : 'red' }} onClick={function () { }} >{item.attstatus}</Button> </td>
+
+                                                        <td className='fw-bold bg-white'><button onClick={(e) => makeabsentradio(item.PM_id, item.attdate)} className='btn-sm btn btn-secondary'><ModeEditOutlineSharpIcon style={{ fontSize: "20px" }} /> </button></td>
                                                         <td className='fw-bold bg-white'>{item.Time_In} </td>
                                                         <td className='fw-bold bg-white'>{item.Time_out}</td>
 
@@ -1065,7 +1179,7 @@ const Contracter = () => {
 
 
                                 {/* CALENDARR OPEN MODALLL--- */}
-                               
+
                                 <Modal open={cisOpen} onClose={handleModalClose}
                                     aria-labelledby="modal-title"
                                     aria-describedby="modal-desc"
@@ -1112,110 +1226,117 @@ const Contracter = () => {
                                                             size="lg"
                                                             variant="solid"
                                                         >Take Attendance as of <label className='text-warning'>[</label> {moment(dateState).format('DD-MM-YYYY')} <label className='text-warning'>]</label> </Chip>
-
+                                                        {/* <Button 
+                        color="neutral"
+                        onClick={markallpresent}
+                        size="sm"
+                       
+                        startDecorator={< CreditScoreIcon />}
+                        style={{backgroundColor:"white",color:"black",marginLeft:"7.5%"}}
+                    >Mark All </Button> */}
                                                     </div>
 
                                                     <div className='col-sm-12 col-md-12 col-lg-12'>
-                                                        <ol class="list-group list-group-numbered mt-4 ">
+                                                        {smember.length > 0 && (
 
-                                                            {
-                                                                smember.map((item, i) => (
+                                                            <ol class="list-group list-group-numbered mt-4 ">
 
-                                                                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                                                                        <div class="ms-2 me-auto">
+                                                                {
+                                                                    smember.map((item, i) => (
 
-                                                                            <NavLink onClick={() => { getmemberid(item.PM_id) }} className="text-decoration-none"><div class="fw-bold">{item.member}</div></NavLink>
+                                                                        <li class="list-group-item d-flex justify-content-between align-items-start">
+                                                                            <div class="ms-2 me-auto">
 
-
-                                                                        </div>
-
-                                                                        <button onClick={(e) => { storememberid(e, item.PM_id); validatethedata(e, item.PM_id, moment(dateState).format('DD-MM-YYYY')); getTimeOut(e, item.PM_id); }} data-bs-toggle="offcanvas" href="#offcanvasExample" className='btn btn-warning ms-3 '><i class="bi bi-clock-history "></i></button>
-
-                                                                        {/* -------------------------------------------------- */}
-
-                                                                        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-                                                                            <div class="offcanvas-header">
+                                                                                <NavLink onClick={() => { getmemberid(item.PM_id) }} className="text-decoration-none"><div class="fw-bold">{item.member}</div></NavLink>
 
 
-
-                                                                                {hello.length > 0 ? (
-                                                                                    // Render this if hello has elements
-                                                                                    <button class="btn btn-success" type="button">Current Status for [ {Timeinout[0]?.member} ]</button>
-                                                                                ) : (
-                                                                                    // Render this if hello is empty
-                                                                                    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Mark status for
-                                                                                        <button type="button" class="btn btn-secondary position-relative ms-3">
-                                                                                            <i class="bi bi-card-checklist fs-5"></i> {store[0]?.member}
-                                                                                            <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
-                                                                                                <span class="visually-hidden">New alerts</span>
-                                                                                            </span>
-                                                                                        </button>
-
-
-                                                                                    </h5>
-
-
-                                                                                )}
-
-
-                                                                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                                                                             </div>
-                                                                            <div class="offcanvas-body">
-                                                                                <div>
+
+                                                                            <button onClick={(e) => { storememberid(e, item.PM_id); validatethedata(e, item.PM_id, moment(dateState).format('DD-MM-YYYY')); getTimeOut(e, item.PM_id); }} data-bs-toggle="offcanvas" href="#offcanvasExample" className='btn btn-warning ms-3 '><i class="bi bi-clock-history "></i></button>
+
+                                                                            {/* -------------------------------------------------- */}
+
+                                                                            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+                                                                                <div class="offcanvas-header">
+
 
 
                                                                                     {hello.length > 0 ? (
                                                                                         // Render this if hello has elements
-                                                                                        <ul class="list-group">
-
-                                                                                            <li class="list-group-item text-danger fw-bold"> <i class="bi bi-clock-fill"></i> Time_In : <label className='text-dark fw-bold'>{hello[0]?.Time_In}</label> </li>
-                                                                                            <li class="list-group-item text-danger fw-bold"><i class="bi bi-clock-history"></i> Time_Out : <label className='text-dark fw-bold'>{hello[0]?.Time_out}</label>  </li>
-                                                                                            <li class="list-group-item text-danger fw-bold"> <i class="bi bi-check-square-fill"></i> Status : <label className='text-dark fw-bold'>{hello[0]?.attstatus}</label>  </li>
-
-                                                                                        </ul>
+                                                                                        <button class="btn btn-success" type="button">Current Status for [ {Timeinout[0]?.member} ]</button>
                                                                                     ) : (
                                                                                         // Render this if hello is empty
-                                                                                        <form method='POST'>
+                                                                                        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Mark status for
+                                                                                            <button type="submit" class="btn btn-secondary position-relative ms-3">
+                                                                                                <i class="bi bi-card-checklist fs-5"></i> {store[0]?.member}
+                                                                                                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                                                                                    <span class="visually-hidden">New alerts</span>
+                                                                                                </span>
+                                                                                            </button>
 
 
-                                                                                            <div class="mb-3">
-                                                                                                <label for="exampleFormControlInput1" class="form-label">Time_In</label>
-                                                                                                <input type="text"
-                                                                                                    class="form-control"
-                                                                                                    id="exampleFormControlInput1"
-                                                                                                    placeholder="Enter the Time_in"
-                                                                                                    name='Time_In'
-                                                                                                    value={user.Time_In}
-                                                                                                    onChange={handleInputone}
-                                                                                                />
-                                                                                            </div>
+                                                                                        </h5>
 
-                                                                                            <div class="mb-3">
-                                                                                                <label for="exampleFormControlInput1" class="form-label">Time_out</label>
-                                                                                                <input type="text"
-                                                                                                    class="form-control"
-                                                                                                    id="exampleFormControlInput1"
-                                                                                                    placeholder="Enter the time out"
-                                                                                                    name='Time_out'
-                                                                                                    value={user.Time_out}
-                                                                                                    onChange={handleInputone}
-                                                                                                />
-                                                                                            </div>
-
-                                                                                            <select value={selectedOption} onChange={handleSelectChange} name='status' class="form-select mt-2" aria-label="Default select example">
-                                                                                                <option selected>Select Present or absent</option>
-                                                                                                <option value="1,Present">Present</option>
-                                                                                                <option value="0,Absent">Absent</option>
-
-                                                                                            </select>
-
-                                                                                            <button onClick={(e) => { markpresentabsentone(e, store[0]?.PM_id, moment(dateState).format('DD-MM-YYYY')) }} className='btn btn-primary mt-3
-                        '>Submit</button>
-                                                                                        </form>
 
                                                                                     )}
 
 
+                                                                                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                                                                </div>
+                                                                                <div class="offcanvas-body">
+                                                                                    <div>
+
+
+                                                                                        {hello.length > 0 ? (
+                                                                                            // Render this if hello has elements
+                                                                                            <ul class="list-group">
+
+                                                                                                <li class="list-group-item text-danger fw-bold"> <i class="bi bi-clock-fill"></i> Time_In : <label className='text-dark fw-bold'>{hello[0]?.Time_In}</label> </li>
+                                                                                                <li class="list-group-item text-danger fw-bold"><i class="bi bi-clock-history"></i> Time_Out : <label className='text-dark fw-bold'>{hello[0]?.Time_out}</label>  </li>
+                                                                                                <li class="list-group-item text-danger fw-bold"> <i class="bi bi-check-square-fill"></i> Status : <label className='text-dark fw-bold'>{hello[0]?.attstatus}</label>  </li>
+
+                                                                                            </ul>
+                                                                                        ) : (
+                                                                                            // Render this if hello is empty
+                                                                                            <form method='POST'>
+
+
+                                                                                                <div class="mb-3">
+                                                                                                    <label for="exampleFormControlInput1" class="form-label">Time_In</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        id="exampleFormControlInput1"
+                                                                                                        placeholder="Enter the Time_in"
+                                                                                                        name='Time_In'
+                                                                                                        value={user.Time_In}
+                                                                                                        onChange={handleInputone}
+                                                                                                    />
+                                                                                                </div>
+
+                                                                                                <div class="mb-3">
+                                                                                                    <label for="exampleFormControlInput1" class="form-label">Time_out</label>
+                                                                                                    <input type="text"
+                                                                                                        class="form-control"
+                                                                                                        id="exampleFormControlInput1"
+                                                                                                        placeholder="Enter the time out"
+                                                                                                        name='Time_out'
+                                                                                                        value={user.Time_out}
+                                                                                                        onChange={handleInputone}
+                                                                                                    />
+                                                                                                </div>
+
+                                                                                                <select value={selectedOption} onChange={handleSelectChange} name='status' class="form-select mt-2" aria-label="Default select example">
+                                                                                                    <option selected>Select Present or absent</option>
+                                                                                                    <option value="1,Present">Present</option>
+                                                                                                    <option value="0,Absent">Absent</option>
+
+                                                                                                </select>
+
+                                                                                                <button onClick={(e) => { markpresentabsentone(e, store[0]?.PM_id, moment(dateState).format('DD-MM-YYYY')) }} className='btn btn-primary mt-3
+                  '>Submit</button>
+                                                                                            </form>
+
+                                                                                        )}
 
 
 
@@ -1226,20 +1347,24 @@ const Contracter = () => {
 
 
 
+
+
+
+                                                                                    </div>
 
                                                                                 </div>
-
                                                                             </div>
-                                                                        </div>
 
-                                                                        {/* -------------------------------------------------- */}
-
+                                                                            {/* -------------------------------------------------- */}
 
 
-                                                                    </li>
-                                                                ))
-                                                            }
-                                                        </ol>
+
+                                                                        </li>
+                                                                    ))
+                                                                }
+                                                            </ol>
+
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -1276,12 +1401,70 @@ const Contracter = () => {
             </div>
 
 
+            <Transition in={rahopen} timeout={400}>
+                {(state) => (
+                    <Modal
+                        keepMounted
+                        open={!['exited', 'exiting'].includes(state)}
+                        onClose={() => setrahOpen(false)}
+                        slotProps={{
+                            backdrop: {
+                                sx: {
+                                    opacity: 0,
+                                    backdropFilter: 'none',
+                                    transition: `opacity 400ms, backdrop-filter 400ms`,
+                                    ...{
+                                        entering: { opacity: 1, backdropFilter: 'blur(8px)' },
+                                        entered: { opacity: 1, backdropFilter: 'blur(8px)' },
+                                    }[state],
+                                },
+                            },
+                        }}
+                        sx={{
+                            visibility: state === 'exited' ? 'hidden' : 'visible',
+                        }}
+                    >
+                        <ModalDialog
+                            aria-labelledby="fade-modal-dialog-title"
+                            aria-describedby="fade-modal-dialog-description"
+                            sx={{
+                                opacity: 0,
+                                transition: `opacity 300ms`,
+                                ...{
+                                    entering: { opacity: 1 },
+                                    entered: { opacity: 1 },
+                                }[state],
+                            }}
+                        >
+                            <Typography  id="fade-modal-dialog-title" component="h2">
+                                <label className='ms-4'>All Details of contractor</label>
+                            </Typography>
+                            <Typography
+                                id="fade-modal-dialog-description"
+                                textColor="text.tertiary"
+                            >
+                                <ul class="list-group">
+                                   
+                                    <li class="list-group-item"><label style={{ fontWeight: "bold" }}>Total Hour of shifts : <label style={{ color: "red" }}>{countshifts[0]?.multiplied_count} Hrs</label></label></li>
+                                    <li class="list-group-item"><label style={{ fontWeight: "bold" }}>Total Hour of Missing Shifts : <label style={{ color: "red" }}>{countabsent[0]?.absent * 9} Hours</label></label></li>
+                                    <li class="list-group-item"><label style={{ fontWeight: "bold" }}>Number of Absent Days : <label style={{ color: "red" }}>{countabsent[0]?.absent} Days</label></label></li>
+
+                                </ul>
+
+                            </Typography>
+                        </ModalDialog>
+                    </Modal>
+                )}
+            </Transition>
+
+
+
             {/* modal-------------------------- */}
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">All Details of contractor</h1>
+                            <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -1369,4 +1552,4 @@ const Contracter = () => {
     )
 }
 
-export default Contracter
+export default Contractor
