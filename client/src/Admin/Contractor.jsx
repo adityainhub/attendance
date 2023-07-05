@@ -19,7 +19,6 @@ import Footer from './Footer';
 import Modal from '@mui/joy/Modal';
 import Sheet from '@mui/joy/Sheet';
 import ModalClose from '@mui/joy/ModalClose';
-import withAuth from "./withAuth";
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import ModalDialog from '@mui/joy/ModalDialog';
 import Typography from '@mui/joy/Typography';
