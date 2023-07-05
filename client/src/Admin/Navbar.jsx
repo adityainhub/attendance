@@ -4,14 +4,21 @@ import Button from '@mui/joy/Button';
 import RadioGroup from '@mui/joy/RadioGroup';
 import Radio from '@mui/joy/Radio';
 import Typography from '@mui/joy/Typography';
+import logo from "../images/img.png"
 
 const Navbar = () => {
     const [variant, setVariant] = React.useState('solid');
     return (
         <>
-            <nav class="navbar navbar-expand-lg bg-body-tertiary ">
+            <nav class="navbar navbar-expand-lg bg-body-tertiary admin1">
                 <div class="container-fluid">
-                    <NavLink to="/admindash" className="navbar-brand">Nexus Nova</NavLink>
+                    
+                        <NavLink className="navbar-brand">
+                            <img src={logo} alt="Bootstrap" width="150" height="59" />
+                        </NavLink>
+                        
+                    
+                    {/* <NavLink to="/admindash" className="">Nexus Nova</NavLink> */}
 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
