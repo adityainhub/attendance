@@ -13,6 +13,7 @@ import ModeEditOutlineSharpIcon from '@mui/icons-material/ModeEditOutlineSharp';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DownloadIcon from '@mui/icons-material/Download';
 import Chip from '@mui/joy/Chip';
+import withAuth from "./withAuth";
 import Tooltip from '@mui/joy/Tooltip';
 import Button from '@mui/joy/Button';
 import Footer from './Footer';
