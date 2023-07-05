@@ -220,7 +220,7 @@ table th:last-child{
   width: 100%;
   height: 100vh;
   position: relative;
-  background: #f5f8fd url("./images/img2.png") center top no-repeat;
+  background: #f5f8fd url("./images/intro-bg.jpg") center top no-repeat;
   background-size: cover;
   padding-top: 110px;
 }
@@ -312,7 +312,7 @@ table th:last-child{
 }
 
 .contractor-body{
-  background: #f5f8fd url("./images/img2.png")  ;
+  background: #f5f8fd url("./images/retro-futuristic-texture-in-blue-tones-2021-08-29-12-59-24-utc.jpg")  ;
   background-size: cover; /* or "contain" depending on what you want */
   background-position: center center;
   background-repeat: no-repeat;
@@ -320,7 +320,13 @@ table th:last-child{
 overflow: auto;
 
 }
+.admin-nav{
+  background-color: #0a98c0 !important;
+}
 
+.admin1{
+  font-weight: bold;
+}
 .modal-size {
 
   width: 100% !important;
